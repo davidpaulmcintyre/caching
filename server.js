@@ -5,33 +5,16 @@ const responseTime = require('response-time')
 const Redis = require('ioredis');
 const session = require('express-session');
 const bodyParser = require('body-parser')
-const cookieParser = require('cookie-parser')
-const cookieSession = require('cookie-session')
+// const cookieParser = require('cookie-parser')
+// const cookieSession = require('cookie-session')
 const app = express();  
 
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+app.use( bodyParser.json() );      
+app.use(bodyParser.urlencoded({      
   extended: true
 })); 
-app.use(cookieParser());
-app.use(cookieSession());
-// const cache = new AWS.ElastiCache({apiVersion: '2015-02-02', endpoint: process.env.REDIS_URL});
-// var RedisServer = require('redis-clustr');
-// var RedisClient = require('redis');
-// var config = require("./config.json");
-
-// var redisClient = new RedisServer({
-//     servers: [
-//         {
-//             host: process.env.REDIS_URL,
-//             port: process.env.REDIS_PORT
-//         }
-//     ],
-//     // createClient: function (port, host) {
-//     //     // this is the default behaviour
-//     //     return RedisClient.createClient(port, host);
-//     // }
-// });  
+// app.use(cookieParser());
+// app.use(cookieSession({signed: false}));  
 const opts = {
     host: process.env.REDIS_URL,
     port: process.env.REDIS_PORT,
@@ -41,8 +24,7 @@ const opts = {
 const redis = new Redis(opts); 
 
 console.log(process.env.REDIS_URL)
-app.use(session({
-    // secret: 'keyboard cat',
+app.use(session({ 
     resave: false,
     saveUninitialized: true,
     cookie: { secure: true }
