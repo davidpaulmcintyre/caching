@@ -6,7 +6,8 @@ const Redis = require('ioredis');
 const session = require('express-session');
 const bodyParser = require('body-parser')
 const app = express();  
-
+app.use(express.cookieParser('secret'));
+app.use(express.cookieSession());
 // const cache = new AWS.ElastiCache({apiVersion: '2015-02-02', endpoint: process.env.REDIS_URL});
 // var RedisServer = require('redis-clustr');
 // var RedisClient = require('redis');
