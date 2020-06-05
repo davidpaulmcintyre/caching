@@ -3,6 +3,15 @@ require('dotenv').config()
 const responseTime = require('response-time') 
 // const redis = require('redis'); 
 const Redis = require('ioredis');
+var Mysql      = require('mysql');
+var mysql = Mysql.createConnection({
+    host     : process.env.MYSQL_URL,
+    port      :  process.env.MYSQL_PORT,
+    user     : process.env.MYSQL_PORT,
+    password : process.env.MYSQL_PASSWORD,
+    database : process.env.MYSQL_DB
+});
+
 const session = require('express-session');
 const bodyParser = require('body-parser')
 // const cookieParser = require('cookie-parser')
@@ -22,6 +31,15 @@ const opts = {
     maxRetriesPerRequest: 5
 };
 const redis = new Redis(opts); 
+
+mysql.connect(function(err){
+    if(!err) {
+        console.log("Database is connected ... ");    
+    } else {
+        console.log("Error connecting database ... ");    
+    }
+});
+
 
 console.log(process.env.REDIS_URL)
 app.use(session({ 
@@ -84,10 +102,10 @@ app.get('/logout', (req, res) => {
     if (req.session && req.session.username){
         console.log('logout') 
         req.session.destroy(function(err) {
-            return res.sendFile(__dirname + '/views/login.html') 
+            res.redirect(301, '/login')
         })
     } else {
-    return res.sendFile(__dirname + '/views/login.html') 
+        res.redirect(301, '/login')
     } 
 }); 
 

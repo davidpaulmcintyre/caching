@@ -16,6 +16,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "ioredis": "^4.17.3",
+    "mysql": "^2.18.1",
     "redis": "^3.0.2",
     "redis-clustr": "^1.7.0",
     "redis-server": "^1.2.2",
