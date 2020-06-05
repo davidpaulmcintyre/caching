@@ -2,7 +2,7 @@ const express = require('express');
 require('dotenv').config()
 const responseTime = require('response-time')
 const axios = require('axios');
-const redis = require('redis'); 
+// const redis = require('redis'); 
 const session = require('express-session');
 const bodyParser = require('body-parser')
 const app = express();  
@@ -12,7 +12,7 @@ var RedisClustr = require('redis-clustr');
 var RedisClient = require('redis');
 // var config = require("./config.json");
 
-var redis = new RedisClustr({
+var redisClient = new RedisClustr({
     servers: [
         {
             host: process.env.REDIS_URL,
@@ -23,10 +23,10 @@ var redis = new RedisClustr({
         // this is the default behaviour
         return RedisClient.createClient(port, host);
     }
-});
+});  
 
 //connect to redis
-redis.on("connect", function () {
+redisClient.on("connect", function () {
   console.log("connected");
 });
 
@@ -58,8 +58,8 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 
 let client;
-const RedisServer = require('redis-server'); 
-const server = new RedisServer(6379);
+// const RedisServer = require('redis-server'); 
+// const server = new RedisServer(6379);
  
 server.open((err) => {
   if (err === null) { 
@@ -78,13 +78,13 @@ app.get('/', (req, res) => {
     if (req.session && req.session.username){
         const username = req.session.username
         console.log('has username')  
-        redis.set("framework", "AngularJS", function (err, reply) {
+        redisClient.set("framework", "AngularJS", function (err, reply) {
             console.log("redis.set " , reply);
           });
           
-          redis.get("framework", function (err, reply) {
-            console.log("redis.get ", reply);
-          });
+        redisClient.get("framework", function (err, reply) {
+        console.log("redis.get ", reply);
+        });
         return res.sendFile(__dirname + '/views/index.html')
 
     }  else {
