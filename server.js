@@ -25,9 +25,11 @@ const redis = new Redis(opts);
 
 console.log(process.env.REDIS_URL)
 app.use(session({ 
+    secret: 'randomstring',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true }
+    cookie: { secure: true, 
+        httpOnly: true }
   }))
 
 app.listen(80, function() {
