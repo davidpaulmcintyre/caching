@@ -8,27 +8,27 @@ const bodyParser = require('body-parser')
 const app = express();  
 
 // const cache = new AWS.ElastiCache({apiVersion: '2015-02-02', endpoint: process.env.REDIS_URL});
-var RedisClustr = require('redis-clustr');
-var RedisClient = require('redis');
+var RedisServer = require('redis-clustr');
+// var RedisClient = require('redis');
 // var config = require("./config.json");
 
-var redisClient = new RedisClustr({
+var redisClient = new RedisServer({
     servers: [
         {
             host: process.env.REDIS_URL,
             port: process.env.REDIS_PORT
         }
     ],
-    createClient: function (port, host) {
-        // this is the default behaviour
-        return RedisClient.createClient(port, host);
-    }
+    // createClient: function (port, host) {
+    //     // this is the default behaviour
+    //     return RedisClient.createClient(port, host);
+    // }
 });  
 
 //connect to redis
-redisClient.on("connect", function () {
-  console.log("connected");
-});
+// redisClient.on("connect", function () {
+//   console.log("connected");
+// });
 
 //check the functioning
 // redis.set("framework", "AngularJS", function (err, reply) {
@@ -57,32 +57,32 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 })); 
 
 
-let client;
+// let client;
 // const RedisServer = require('redis-server'); 
-// const server = new RedisServer(6379);
+// const redisServer = new RedisServer(6379);
  
-server.open((err) => {
-  if (err === null) { 
-    client = redis.createClient();
-    client.on('connect', (err) => {
-        console.log("connect " + err);
-      });
-    // // Print redis errors to the console
-    client.on('error', (err) => {
-      console.log("Error " + err);
-    });
-  }
+redisClient.on("connect", function () {
+    console.log("connected");
+  });
+  
+  //check the functioning
+redisClient.set("framework", "AngularJS", function (err, reply) {
+console.log("redis.set " , reply);
+});
+
+redisClient.get("framework", function (err, reply) {
+console.log("redis.get ", reply);
 }); 
  
 app.get('/', (req, res) => { 
     if (req.session && req.session.username){
         const username = req.session.username
         console.log('has username')  
-        redisClient.set("framework", "AngularJS", function (err, reply) {
+        redisClient.set(username, username, function (err, reply) {
             console.log("redis.set " , reply);
           });
           
-        redisClient.get("framework", function (err, reply) {
+        redisClient.get(username, function (err, reply) {
         console.log("redis.get ", reply);
         });
         return res.sendFile(__dirname + '/views/index.html')
