@@ -1,10 +1,46 @@
 const express = require('express');
+require('dotenv').config()
 const responseTime = require('response-time')
 const axios = require('axios');
 const redis = require('redis'); 
 const session = require('express-session');
 const bodyParser = require('body-parser')
 const app = express();  
+
+// const cache = new AWS.ElastiCache({apiVersion: '2015-02-02', endpoint: process.env.REDIS_URL});
+var RedisClustr = require('redis-clustr');
+var RedisClient = require('redis');
+// var config = require("./config.json");
+
+var redis = new RedisClustr({
+    servers: [
+        {
+            host: process.env.REDIS_URL,
+            port: process.env.REDIS_PORT
+        }
+    ],
+    createClient: function (port, host) {
+        // this is the default behaviour
+        return RedisClient.createClient(port, host);
+    }
+});
+
+//connect to redis
+redis.on("connect", function () {
+  console.log("connected");
+});
+
+//check the functioning
+// redis.set("framework", "AngularJS", function (err, reply) {
+//   console.log("redis.set " , reply);
+// });
+
+// redis.get("framework", function (err, reply) {
+//   console.log("redis.get ", reply);
+// });
+
+
+console.log(process.env.REDIS_URL)
 app.use(session({
     secret: 'keyboard cat',
     resave: false,
@@ -40,8 +76,15 @@ server.open((err) => {
  
 app.get('/', (req, res) => { 
     if (req.session && req.session.username){
-        console.log('has username') 
-        // return res.status(200).json({username: req.session.username});
+        const username = req.session.username
+        console.log('has username')  
+        redis.set("framework", "AngularJS", function (err, reply) {
+            console.log("redis.set " , reply);
+          });
+          
+          redis.get("framework", function (err, reply) {
+            console.log("redis.get ", reply);
+          });
         return res.sendFile(__dirname + '/views/index.html')
 
     }  else {
