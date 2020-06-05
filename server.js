@@ -1,7 +1,6 @@
 const express = require('express');
 require('dotenv').config()
-const responseTime = require('response-time')
-// const axios = require('axios');
+const responseTime = require('response-time') 
 // const redis = require('redis'); 
 const Redis = require('ioredis');
 const session = require('express-session');
@@ -31,22 +30,7 @@ const opts = {
     autoResubscribe: true,
     maxRetriesPerRequest: 5
 };
-const redis = new Redis(opts);
-
-//connect to redis
-// redisClient.on("connect", function () {
-//   console.log("connected");
-// });
-
-//check the functioning
-// redis.set("framework", "AngularJS", function (err, reply) {
-//   console.log("redis.set " , reply);
-// });
-
-// redis.get("framework", function (err, reply) {
-//   console.log("redis.get ", reply);
-// });
-
+const redis = new Redis(opts); 
 
 console.log(process.env.REDIS_URL)
 app.use(session({
@@ -56,18 +40,13 @@ app.use(session({
     cookie: { secure: true }
   }))
 
-app.listen(3000, function() {
-  console.log('Example app listening on port 3000!');
+app.listen(80, function() {
+  console.log('Example app listening on port 80!');
 });
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
-})); 
-
-
-// let client;
-// const RedisServer = require('redis-server'); 
-// const redisServer = new RedisServer(6379);
+}));  
  
 redis.on("connect", function () {
     console.log("connected");
@@ -78,21 +57,21 @@ redis.on("connect", function () {
 });
 
   //check the functioning
-redis.set("framework", "AngularJS", function (err, reply) {
-    if (err){
-        console.log(err)
-    } else {
-        console.log("redis.set " , reply);
-    }
-});
+// redis.set("framework", "AngularJS", function (err, reply) {
+//     if (err){
+//         console.log(err)
+//     } else {
+//         console.log("redis.set " , reply);
+//     }
+// });
 
-redis.get("framework", function (err, reply) {
-    if (err){
-        console.log(err)
-    } else {
-        console.log("redis.set " , reply);
-    }
-}); 
+// redis.get("framework", function (err, reply) {
+//     if (err){
+//         console.log(err)
+//     } else {
+//         console.log("redis.set " , reply);
+//     }
+// }); 
  
 app.get('/', (req, res) => { 
     if (req.session && req.session.username){
@@ -108,8 +87,7 @@ app.get('/', (req, res) => {
         return res.sendFile(__dirname + '/views/index.html')
 
     }  else {
-        console.log('no username')
-        // return res.sendFile(__dirname + '/views/login.html')
+        console.log('no username') 
         res.redirect(301, '/login')
     } 
 }); 
