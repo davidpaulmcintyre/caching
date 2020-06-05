@@ -42,7 +42,7 @@ var redisClient = new RedisServer({
 
 console.log(process.env.REDIS_URL)
 app.use(session({
-    secret: 'keyboard cat',
+    // secret: 'keyboard cat',
     resave: false,
     saveUninitialized: true,
     cookie: { secure: true }
@@ -67,11 +67,19 @@ redisClient.on("connect", function () {
   
   //check the functioning
 redisClient.set("framework", "AngularJS", function (err, reply) {
-console.log("redis.set " , reply);
+    if (err){
+        console.log(err)
+    } else {
+        console.log("redis.set " , reply);
+    }
 });
 
 redisClient.get("framework", function (err, reply) {
-console.log("redis.get ", reply);
+    if (err){
+        console.log(err)
+    } else {
+        console.log("redis.set " , reply);
+    }
 }); 
  
 app.get('/', (req, res) => { 
