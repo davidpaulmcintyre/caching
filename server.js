@@ -5,9 +5,16 @@ const responseTime = require('response-time')
 const Redis = require('ioredis');
 const session = require('express-session');
 const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
+const cookieSession = require('cookie-session')
 const app = express();  
-app.use(express.cookieParser('secret'));
-app.use(express.cookieSession());
+
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+})); 
+app.use(cookieParser());
+app.use(cookieSession());
 // const cache = new AWS.ElastiCache({apiVersion: '2015-02-02', endpoint: process.env.REDIS_URL});
 // var RedisServer = require('redis-clustr');
 // var RedisClient = require('redis');
@@ -43,11 +50,7 @@ app.use(session({
 
 app.listen(80, function() {
   console.log('Example app listening on port 80!');
-});
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  extended: true
-}));  
+}); 
  
 redis.on("connect", function () {
     console.log("connected");
