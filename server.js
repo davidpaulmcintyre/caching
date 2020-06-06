@@ -107,10 +107,10 @@ app.get('/planet', (req, res) => {
     const key = "planet:" + id.toString();
     const result = redis.hgetall(key)
     console.log('id ', id)
-    // if (result){
-    //     res.setHeader('Content-Type', 'application/json');
-    //     res.end(JSON.stringify({ content: result }, null, 3));
-    // } else { 
+    if (result){
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ content: result }, null, 3));
+    } else { 
         mysql.query(`SELECT * FROM planet where id = ${id}`, function (err, row) {
         if (err) {
             return 'db error occurred'
@@ -122,6 +122,6 @@ app.get('/planet', (req, res) => {
             res.end(JSON.stringify({ content: row }, null, 3));
         } 
         })
-    // } 
+    } 
 
 }); 
