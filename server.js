@@ -118,6 +118,8 @@ app.get('/planet', (req, res) => {
                     console.log('db error occurred')
                     return 'db error occurred'
                 } else {
+                    debugger;
+                    console.log('resultFromDb ', resultFromDb)
                     const row = JSON.stringify(resultFromDb);
                     console.log('row ', row)  
 
