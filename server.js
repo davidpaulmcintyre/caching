@@ -118,3 +118,27 @@ app.post('/login', (req, res) => {
     req.session.username = req.body.username
     return res.sendFile(__dirname + '/views/index.html')
 }); 
+
+app.get('/planet', (req, res) => {  
+    console.log('planet page') 
+    const id = req.query.q.trim(); 
+    const key = "planet:" + str(id)
+    const result = cache.hgetall(key)
+    if (result){
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ content: result }, null, 3));
+    } else {
+        const sql = "SELECT `id`, `name` FROM `planet` WHERE `id`=%s"
+        const row = mysql.query(`SELECT * FROM planet where id = ${id}`, function (err, result, fields) {
+            if (err) {
+                return 'db error occurred'
+            } else {
+                cache.hmset(key, result)
+                cache.expire(key, ttl)
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ content: row }, null, 3));
+            } 
+        })
+    } 
+
+}); 
