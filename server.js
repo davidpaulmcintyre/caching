@@ -151,8 +151,8 @@ app.post('/update', (req, res) => {
                     console.log('insert db error occurred')
                     return 'insert db error occurred'
                 } else { 
-                    console.log('inserted into db then into cache')   
-                    const row = JSON.stringify(resultFromDb[0]); 
+                    console.log('inserted into db then into cache', resultFromDb)   
+                    const row = JSON.stringify(resultFromDb); 
                     console.log('row ', row)
                     const fields = JSON.parse(row) 
                     console.log('fields ', fields)
