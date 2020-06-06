@@ -183,8 +183,15 @@ app.post('/update', (req, res) => {
                         id: row.insertId,
                         name: value
                     }
-                    redis.hset(key, JSON.stringify(valueIntoCache)); 
-                    return res.status(200).json({ source: 'mysql', ...valueIntoCache, }); 
+                    for (const [k, v] of Object.entries(valueIntoCache)) { 
+                        await redis.hset(key, k, v); 
+                    }
+
+                    // await redis.hset(key, 'source', 'redis cache'); 
+                    // await redis.hset(key, 'id', row.insertId); 
+                    // await redis.hset(key, 'name', value); 
+                    // redis.hset(key, JSON.stringify(valueIntoCache)); 
+                    return res.status(200).json(valueIntoCache); 
                 } 
             }) 
         }
