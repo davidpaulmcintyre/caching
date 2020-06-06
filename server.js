@@ -136,7 +136,7 @@ app.post('/update', (req, res) => {
     console.log('update form submitted ')
     const id = req.body.id;
     const value = req.body.value;
-    const key = "planet:" + id.toString();
+    const key = "planet:" + id;
     return redis.get(key, (err, resultFromCache) => {
         // If that key exist in Redis store
         if (resultFromCache) {
@@ -146,7 +146,7 @@ app.post('/update', (req, res) => {
             // return res.status(200).json(resultJSON);
         } else { 
             // insert record into db
-            mysql.query(`INSERT INTO planet (name) values ('${value}')`, function (err, resultFromDb) {
+            mysql.query(`INSERT INTO planet (name) values ('${value}')`, function (err, resultFromDb, fields) {
                 if (err) {
                     console.log('insert db error occurred')
                     return 'insert db error occurred'
@@ -154,10 +154,15 @@ app.post('/update', (req, res) => {
                     console.log('inserted into db then into cache', resultFromDb)   
                     const row = JSON.stringify(resultFromDb); 
                     console.log('row ', row)
-                    const fields = JSON.parse(row) 
+                    // const fields = JSON.parse(row) 
                     console.log('fields ', fields)
-                    redis.setex(key, 3600, JSON.stringify({ source: 'redis cache', ...fields, })); 
-                    return res.status(200).json({ source: 'mysql', ...fields, }); 
+                    const valueIntoCache = {
+                        source: 'redis cache',
+                        id: "planet:" + row.insertId,
+                        value
+                    }
+                    redis.setex(key, 3600, JSON.stringify(valueIntoCache)); 
+                    return res.status(200).json({ source: 'mysql', ...valueIntoCache, }); 
                 } 
             }) 
         }
