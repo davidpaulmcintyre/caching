@@ -105,7 +105,7 @@ app.get('/planet', (req, res) => {
     console.log('planet page') 
     const id = Number(req.query.id)
     const key = "planet:" + id.toString();
-    const result = cache.hgetall(key)
+    const result = redis.hgetall(key)
     if (result){
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({ content: result }, null, 3));
