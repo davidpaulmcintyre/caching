@@ -168,7 +168,7 @@ app.post('/update', (req, res) => {
             }) 
         } else { 
             // insert record into db
-            mysql.query(`INSERT INTO planet (name) values ('${value}')`, async function (err, resultFromDb, fields) {
+            mysql.query(`INSERT INTO planet (name) values ('${value}')`, function (err, resultFromDb, fields) {
                 if (err) {
                     console.log('insert db error occurred')
                     return 'insert db error occurred'
@@ -183,14 +183,14 @@ app.post('/update', (req, res) => {
                         id: row.insertId,
                         name: value
                     }
-                    for await (const [k, v] of Object.entries(valueIntoCache)) { 
-                         redis.hset(key, k, v);
-                    }
+                    // for await (const [k, v] of Object.entries(valueIntoCache)) { 
+                    //      redis.hset(key, k, v);
+                    // }
 
-                    // await redis.hset(key, 'source', 'redis cache'); 
-                    // await redis.hset(key, 'id', row.insertId); 
-                    // await redis.hset(key, 'name', value); 
-                    // redis.hset(key, JSON.stringify(valueIntoCache)); 
+                     redis.hset(key, 'source', 'redis cache'); 
+                     redis.hset(key, 'id', row.insertId); 
+                     redis.hset(key, 'name', value); 
+                    redis.hset(key, JSON.stringify(valueIntoCache)); 
                     return res.status(200).json(valueIntoCache); 
                 } 
             }) 
