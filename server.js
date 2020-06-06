@@ -106,27 +106,23 @@ app.get('/planet', (req, res) => {
     const id = Number(req.query.id)
     const key = "planet:" + id.toString();
 
-    return redis.get(key, (err, result) => {
+    return redis.get(key, (err, resultFromCache) => {
         // If that key exist in Redis store
-        if (result) {
+        if (resultFromCache) {
             console.log('from cache')   
-            const resultJSON = JSON.parse(result);
+            const resultJSON = JSON.parse(resultFromCache);
             return res.status(200).json(resultJSON);
         } else { 
-            mysql.query(`SELECT * FROM planet where id = ${id}`, function (err, row) {
+            mysql.query(`SELECT * FROM planet where id = ${id}`, function (err, resultFromDb) {
                 if (err) {
                     console.log('db error occurred')
                     return 'db error occurred'
                 } else {
-                    console.log('row ', row) 
-                    const responseJSON = row;
-                    redis.setex(key, 3600, JSON.stringify({ source: 'redis cache', ...responseJSON, }));
+                    console.log('row ', resultFromDb)  
+                    const fields = Object.values(res)[0]
+                    redis.setex(key, 3600, JSON.stringify({ source: 'redis cache', ...fields, }));
                     // Send JSON response to client
-                    return res.status(200).json({ source: 'mysql', ...responseJSON, });
-          
-
-                    res.setHeader('Content-Type', 'application/json');
-                    res.end(JSON.stringify({ content: row }, null, 3));
+                    return res.status(200).json({ source: 'mysql', ...fields, }); 
                 } 
             }) 
         }
