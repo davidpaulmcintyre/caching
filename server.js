@@ -161,40 +161,33 @@ app.post('/update', (req, res) => {
                         id: row.insertId,
                         name: value
                     }
-                    redis.hset(key, "name", value);
-                    // redis.setex(key, 3600, JSON.stringify(valueIntoCache)); 
+                    redis.hset(key, "name", value); 
                     return res.status(200).json({ source: 'mysql', ...valueIntoCache, }); 
                 } 
             }) 
         } else { 
-            // insert record into db
-            mysql.query(`INSERT INTO planet (name) values ('${value}')`, function (err, resultFromDb, fields) {
+            // insert record into db, update if existing
+            mysql.query(`REPLACE into planet (id, name) values(${id}, '${value}')`, function (err, resultFromDb, fields) {
                 if (err) {
                     console.log('insert db error occurred')
                     return 'insert db error occurred'
                 } else { 
                     console.log('inserted into db then into cache', resultFromDb)   
                     const row = JSON.stringify(resultFromDb); 
-                    console.log('row ', row)
-                    // const fields = JSON.parse(row) 
+                    console.log('row ', row) 
                     console.log('fields ', fields)
                     const valueIntoCache = {
                         source: 'redis cache',
                         id: row.insertId,
                         name: value
-                    }
-                    // for await (const [k, v] of Object.entries(valueIntoCache)) { 
-                    //      redis.hset(key, k, v);
-                    // }
-
-                    redis.hset(key, 'source', 'redis cache'); 
-                    redis.hset(key, 'id', row.insertId); 
-                    redis.hset(key, 'name', value); 
-                    // redis.hset(key, JSON.stringify(valueIntoCache)); 
+                    } 
+                    const _key = 'planet:' + row.insertId;
+                    redis.hset(_key, 'source', 'redis cache'); 
+                    redis.hset(_key, 'id', row.insertId); 
+                    redis.hset(_key, 'name', value);  
                     return res.status(200).json(valueIntoCache); 
                 } 
             }) 
         }
-    });
-    // return res.sendFile(__dirname + '/views/update.html') 
+    }); 
 }); 
