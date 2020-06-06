@@ -109,17 +109,16 @@ app.get('/planet', (req, res) => {
     if (result){
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({ content: result }, null, 3));
-    } else {
-        const sql = "SELECT `id`, `name` FROM `planet` WHERE `id`=%s"
-        const row = mysql.query(`SELECT * FROM planet where id = ${id}`, function (err, result, fields) {
-            if (err) {
-                return 'db error occurred'
-            } else {
-                redis.hmset(key, result)
-                redis.expire(key, 3600)
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ content: row }, null, 3));
-            } 
+    } else { 
+        mysql.query(`SELECT * FROM planet where id = ${id}`, function (err, row) {
+        if (err) {
+            return 'db error occurred'
+        } else {
+            redis.hmset(key, row)
+            redis.expire(key, 3600)
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ content: row }, null, 3));
+        } 
         })
     } 
 
