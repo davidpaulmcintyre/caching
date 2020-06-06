@@ -11,6 +11,11 @@ var mysql = Mysql.createConnection({
     database : process.env.MYSQL_DB
 });
 
+// todo: session management
+// todo: load balanced webservers w/ round robin
+// todo: cognito
+// todo: message queue
+
 const session = require('express-session');
 const bodyParser = require('body-parser')
 // const cookieParser = require('cookie-parser')
@@ -140,10 +145,27 @@ app.post('/update', (req, res) => {
     return redis.get(key, (err, resultFromCache) => {
         // If that key exist in Redis store
         if (resultFromCache) {
-            // update db and cache
-            // console.log('from cache')   
-            // const resultJSON = JSON.parse(resultFromCache);
-            // return res.status(200).json(resultJSON);
+            // update db and writethru cache
+            mysql.query(`UPDATE planet set name = '${value}' where id = ${id}`, function (err, resultFromDb, fields) {
+                if (err) {
+                    console.log('update db error occurred')
+                    return 'insert db error occurred'
+                } else { 
+                    console.log('updated db and cache', resultFromDb)   
+                    const row = JSON.stringify(resultFromDb); 
+                    console.log('row ', row)
+                    // const fields = JSON.parse(row) 
+                    console.log('fields ', fields)
+                    const valueIntoCache = {
+                        source: 'redis cache',
+                        id: row.insertId,
+                        name: value
+                    }
+                    redis.hset(key, "name", value);
+                    // redis.setex(key, 3600, JSON.stringify(valueIntoCache)); 
+                    return res.status(200).json({ source: 'mysql', ...valueIntoCache, }); 
+                } 
+            }) 
         } else { 
             // insert record into db
             mysql.query(`INSERT INTO planet (name) values ('${value}')`, function (err, resultFromDb, fields) {
@@ -158,10 +180,10 @@ app.post('/update', (req, res) => {
                     console.log('fields ', fields)
                     const valueIntoCache = {
                         source: 'redis cache',
-                        id: "planet:" + row.insertId,
-                        value
+                        id: row.insertId,
+                        name: value
                     }
-                    redis.setex(key, 3600, JSON.stringify(valueIntoCache)); 
+                    redis.hset(key, JSON.stringify(valueIntoCache)); 
                     return res.status(200).json({ source: 'mysql', ...valueIntoCache, }); 
                 } 
             }) 
