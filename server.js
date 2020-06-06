@@ -118,8 +118,11 @@ app.get('/planet', (req, res) => {
                     console.log('db error occurred')
                     return 'db error occurred'
                 } else {
-                    console.log('row ', resultFromDb)  
-                    const fields = JSON.parse(JSON.stringify(resultFromDb))
+                    const row = JSON.stringify(resultFromDb);
+                    console.log('row ', row)  
+
+                    const fields = JSON.parse(row)
+                    console.log('fields ', fields)  
                     redis.setex(key, 3600, JSON.stringify({ source: 'redis cache', ...fields, }));
                     // Send JSON response to client
                     return res.status(200).json({ source: 'mysql', ...fields, }); 
