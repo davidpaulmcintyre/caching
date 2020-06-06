@@ -183,8 +183,8 @@ app.post('/update', (req, res) => {
                         id: row.insertId,
                         name: value
                     }
-                    for (const [k, v] of Object.entries(valueIntoCache)) { 
-                        await redis.hset(key, k, v); 
+                    for await (const [k, v] of Object.entries(valueIntoCache)) { 
+                         redis.hset(key, k, v);
                     }
 
                     // await redis.hset(key, 'source', 'redis cache'); 
