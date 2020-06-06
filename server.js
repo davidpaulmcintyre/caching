@@ -109,7 +109,7 @@ app.get('/planet', (req, res) => {
     console.log('planet page') 
     const id = Number(req.query.id)
     const key = "planet:" + id.toString();
-    return redis.get(key, (err, resultFromCache) => {
+    return redis.hget(key, (err, resultFromCache) => {
         // If that key exist in Redis store
         if (resultFromCache) {
             console.log('from cache')   
@@ -142,7 +142,7 @@ app.post('/update', (req, res) => {
     const id = req.body.id;
     const value = req.body.value;
     const key = "planet:" + id;
-    return redis.get(key, (err, resultFromCache) => {
+    return redis.hget(key, (err, resultFromCache) => {
         // If that key exist in Redis store
         if (resultFromCache) {
             // update db and writethru cache
