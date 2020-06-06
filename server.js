@@ -168,7 +168,7 @@ app.post('/update', (req, res) => {
             }) 
         } else { 
             // insert record into db
-            mysql.query(`INSERT INTO planet (name) values ('${value}')`, function (err, resultFromDb, fields) {
+            mysql.query(`INSERT INTO planet (name) values ('${value}')`, async function (err, resultFromDb, fields) {
                 if (err) {
                     console.log('insert db error occurred')
                     return 'insert db error occurred'
