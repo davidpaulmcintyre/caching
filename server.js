@@ -1,7 +1,6 @@
 const express = require('express');
 require('dotenv').config()
-const responseTime = require('response-time') 
-// const redis = require('redis'); 
+const responseTime = require('response-time')  
 const Redis = require('ioredis');
 var Mysql      = require('mysql');
 var mysql = Mysql.createConnection({
@@ -105,7 +104,6 @@ app.get('/planet', (req, res) => {
     console.log('planet page') 
     const id = Number(req.query.id)
     const key = "planet:" + id.toString();
-
     return redis.get(key, (err, resultFromCache) => {
         // If that key exist in Redis store
         if (resultFromCache) {
@@ -117,19 +115,52 @@ app.get('/planet', (req, res) => {
                 if (err) {
                     console.log('db error occurred')
                     return 'db error occurred'
-                } else {
-                    debugger;
-                    console.log('resultFromDb ', resultFromDb)
-                    const row = JSON.stringify(resultFromDb[0]);
-                    console.log('row ', row)  
-
-                    const fields = JSON.parse(row)
-                    console.log('fields ', fields)  
-                    redis.setex(key, 3600, JSON.stringify({ source: 'redis cache', ...fields, }));
-                    // Send JSON response to client
+                } else { 
+                    console.log('from db')   
+                    const row = JSON.stringify(resultFromDb[0]); 
+                    const fields = JSON.parse(row) 
+                    redis.setex(key, 3600, JSON.stringify({ source: 'redis cache', ...fields, })); 
                     return res.status(200).json({ source: 'mysql', ...fields, }); 
                 } 
             }) 
         }
-      });
+    });
+}); 
+
+app.get('/update', (req, res) => {  
+    console.log('update form ')
+    return res.sendFile(__dirname + '/views/update.html') 
+}); 
+
+app.post('/update', (req, res) => {  
+    console.log('update form submitted ')
+    const id = req.body.id;
+    const value = req.body.value;
+    const key = "planet:" + id.toString();
+    return redis.get(key, (err, resultFromCache) => {
+        // If that key exist in Redis store
+        if (resultFromCache) {
+            // update db and cache
+            // console.log('from cache')   
+            // const resultJSON = JSON.parse(resultFromCache);
+            // return res.status(200).json(resultJSON);
+        } else { 
+            // insert record into db
+            mysql.query(`INSERT INTO planet (name) values (${value})`, function (err, resultFromDb) {
+                if (err) {
+                    console.log('insert db error occurred')
+                    return 'insert db error occurred'
+                } else { 
+                    console.log('inserted into db then into cache')   
+                    const row = JSON.stringify(resultFromDb[0]); 
+                    console.log('row ', row)
+                    const fields = JSON.parse(row) 
+                    console.log('fields ', fields)
+                    redis.setex(key, 3600, JSON.stringify({ source: 'redis cache', ...fields, })); 
+                    return res.status(200).json({ source: 'mysql', ...fields, }); 
+                } 
+            }) 
+        }
+    });
+    // return res.sendFile(__dirname + '/views/update.html') 
 }); 
