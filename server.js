@@ -4,7 +4,6 @@ const https = require('https')
 const http = require('http')
 const app = express()
 
-
 require('dotenv').config()
 const responseTime = require('response-time')  
 const Redis = require('ioredis');
@@ -25,7 +24,6 @@ const session = require('express-session');
 const bodyParser = require('body-parser')
 // const cookieParser = require('cookie-parser')
 // const cookieSession = require('cookie-session')
-const app = express();  
 
 app.use( bodyParser.json() );      
 app.use(bodyParser.urlencoded({      
