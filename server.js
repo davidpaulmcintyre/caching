@@ -2,13 +2,18 @@ const express = require('express');
 
 const https = require('https')
 const http = require('http')
+const privateKey  = fs.readFileSync('sslcert/server.key', 'utf8');
+const certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
+
+const credentials = {key: privateKey, cert: certificate};
+
 const app = express()
 
 require('dotenv').config()
 const responseTime = require('response-time')  
 const Redis = require('ioredis');
-var Mysql      = require('mysql');
-var mysql = Mysql.createConnection({
+const Mysql      = require('mysql');
+const mysql = Mysql.createConnection({
     host     : process.env.MYSQL_URL,
     port      :  process.env.MYSQL_PORT,
     user     : process.env.MYSQL_USERNAME,
@@ -60,7 +65,7 @@ app.use(session({
 http.createServer(app).listen(80, function() {
     console.log('listening on port 80');
   }); 
-https.createServer({}, app).listen(443, function() {
+https.createServer(credentials, app).listen(443, function() {
     console.log('listening on port 443');
   }); 
 
