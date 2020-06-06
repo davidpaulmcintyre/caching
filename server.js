@@ -119,7 +119,7 @@ app.get('/planet', (req, res) => {
                     return 'db error occurred'
                 } else {
                     console.log('row ', row) 
-                    const responseJSON = response.data;
+                    const responseJSON = row;
                     redis.setex(key, 3600, JSON.stringify({ source: 'redis cache', ...responseJSON, }));
                     // Send JSON response to client
                     return res.status(200).json({ source: 'mysql', ...responseJSON, });
