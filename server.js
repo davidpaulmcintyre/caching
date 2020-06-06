@@ -121,7 +121,7 @@ app.post('/login', (req, res) => {
 
 app.get('/planet', (req, res) => {  
     console.log('planet page') 
-    const id = req.query.q.trim(); 
+    const id = Number(req.query.id)
     const key = "planet:" + str(id)
     const result = cache.hgetall(key)
     if (result){
