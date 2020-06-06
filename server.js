@@ -1,4 +1,10 @@
 const express = require('express');
+
+const https = require('https')
+const http = require('http')
+const app = express()
+
+
 require('dotenv').config()
 const responseTime = require('response-time')  
 const Redis = require('ioredis');
@@ -10,8 +16,7 @@ var mysql = Mysql.createConnection({
     password : process.env.MYSQL_PASSWORD,
     database : process.env.MYSQL_DB
 });
-
-// todo: session management
+ 
 // todo: load balanced webservers w/ round robin
 // todo: cognito
 // todo: message queue
@@ -50,13 +55,17 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: { secure: true, 
-        httpOnly: true }
-  }))
+        httpOnly: true },
+    store: redis
+  })) 
 
-app.listen(80, function() {
-  console.log('Example app listening on port 80!');
-}); 
- 
+http.createServer(app).listen(80, function() {
+    console.log('listening on port 80');
+  }); 
+https.createServer({}, app).listen(443, function() {
+    console.log('listening on port 443');
+  }); 
+
 redis.on("connect", function () {
     console.log("connected");
   });
@@ -103,7 +112,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {   
     req.session.username = req.body.username
     return res.sendFile(__dirname + '/views/index.html')
-}); 
+});  
 
 app.get('/planet', (req, res) => {  
     console.log('planet page') 
@@ -182,9 +191,16 @@ app.post('/update', (req, res) => {
                         name: value
                     } 
                     const _key = 'planet:' + row.insertId;
-                    redis.hset(_key, 'source', 'redis cache'); 
-                    redis.hset(_key, 'id', row.insertId); 
-                    redis.hset(_key, 'name', value);  
+                    // redis.hset(_key, 'source', 'redis cache'); 
+                    // redis.hset(_key, 'id', row.insertId); 
+                    // redis.hset(_key, 'id', row.insertId);  
+                    redis.pipeline()
+                    .hset(_key, 'source', 'redis cache')
+                    .hset(_key, 'id', row.insertId)
+                    .hset(_key, 'id', row.insertId)
+                    .exec(function (err, results) {
+                        console.log('pipeline error')
+                    });
                     return res.status(200).json(valueIntoCache); 
                 } 
             }) 
