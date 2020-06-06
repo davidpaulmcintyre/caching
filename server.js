@@ -146,7 +146,7 @@ app.post('/update', (req, res) => {
             // return res.status(200).json(resultJSON);
         } else { 
             // insert record into db
-            mysql.query(`INSERT INTO planet (name) values (${value})`, function (err, resultFromDb) {
+            mysql.query(`INSERT INTO planet (name) values ('${value}')`, function (err, resultFromDb) {
                 if (err) {
                     console.log('insert db error occurred')
                     return 'insert db error occurred'
