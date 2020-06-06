@@ -40,8 +40,7 @@ mysql.connect(function(err){
     }
 });
 
-
-console.log(process.env.REDIS_URL)
+ 
 app.use(session({ 
     secret: 'randomstring',
     resave: false,
@@ -60,24 +59,7 @@ redis.on("connect", function () {
   
   redis.on('error', err => {
     console.log('error', err.message, {stack: err.stack});
-});
-
-  //check the functioning
-// redis.set("framework", "AngularJS", function (err, reply) {
-//     if (err){
-//         console.log(err)
-//     } else {
-//         console.log("redis.set " , reply);
-//     }
-// });
-
-// redis.get("framework", function (err, reply) {
-//     if (err){
-//         console.log(err)
-//     } else {
-//         console.log("redis.set " , reply);
-//     }
-// }); 
+});  
  
 app.get('/', (req, res) => { 
     if (req.session && req.session.username){
@@ -133,8 +115,8 @@ app.get('/planet', (req, res) => {
             if (err) {
                 return 'db error occurred'
             } else {
-                cache.hmset(key, result)
-                cache.expire(key, ttl)
+                redis.hmset(key, result)
+                redis.expire(key, 3600)
                 res.setHeader('Content-Type', 'application/json');
                 res.end(JSON.stringify({ content: row }, null, 3));
             } 
