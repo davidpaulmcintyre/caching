@@ -120,7 +120,7 @@ app.get('/planet', (req, res) => {
                 } else {
                     debugger;
                     console.log('resultFromDb ', resultFromDb)
-                    const row = JSON.stringify(resultFromDb);
+                    const row = JSON.stringify(resultFromDb[0]);
                     console.log('row ', row)  
 
                     const fields = JSON.parse(row)
