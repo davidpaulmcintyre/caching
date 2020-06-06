@@ -142,7 +142,7 @@ app.post('/update', (req, res) => {
     const id = req.body.id;
     const value = req.body.value;
     const key = "planet:" + id;
-    return redis.hget(key, (err, resultFromCache) => {
+    return redis.hget(key, async (err, resultFromCache) => {
         // If that key exist in Redis store
         if (resultFromCache) {
             // update db and writethru cache
