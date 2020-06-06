@@ -105,23 +105,30 @@ app.get('/planet', (req, res) => {
     console.log('planet page') 
     const id = Number(req.query.id)
     const key = "planet:" + id.toString();
-    const result = redis.hgetall(key)
-    console.log('id ', id)
-    if (result){
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ content: result }, null, 3));
-    } else { 
-        mysql.query(`SELECT * FROM planet where id = ${id}`, function (err, row) {
-        if (err) {
-            return 'db error occurred'
-        } else {
-            console.log('row ', row)
-            redis.hmset(key, row)
-            redis.expire(key, 3600)
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ content: row }, null, 3));
-        } 
-        })
-    } 
 
+    return redis.get(key, (err, result) => {
+        // If that key exist in Redis store
+        if (result) {
+            console.log('from cache')   
+            const resultJSON = JSON.parse(result);
+            return res.status(200).json(resultJSON);
+        } else { 
+            mysql.query(`SELECT * FROM planet where id = ${id}`, function (err, row) {
+                if (err) {
+                    console.log('db error occurred')
+                    return 'db error occurred'
+                } else {
+                    console.log('row ', row) 
+                    const responseJSON = response.data;
+                    redis.setex(key, 3600, JSON.stringify({ source: 'redis cache', ...responseJSON, }));
+                    // Send JSON response to client
+                    return res.status(200).json({ source: 'mysql', ...responseJSON, });
+          
+
+                    res.setHeader('Content-Type', 'application/json');
+                    res.end(JSON.stringify({ content: row }, null, 3));
+                } 
+            }) 
+        }
+      });
 }); 
