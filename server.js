@@ -187,10 +187,10 @@ app.post('/update', (req, res) => {
                     //      redis.hset(key, k, v);
                     // }
 
-                     redis.hset(key, 'source', 'redis cache'); 
-                     redis.hset(key, 'id', row.insertId); 
-                     redis.hset(key, 'name', value); 
-                    redis.hset(key, JSON.stringify(valueIntoCache)); 
+                    redis.hset(key, 'source', 'redis cache'); 
+                    redis.hset(key, 'id', row.insertId); 
+                    redis.hset(key, 'name', value); 
+                    // redis.hset(key, JSON.stringify(valueIntoCache)); 
                     return res.status(200).json(valueIntoCache); 
                 } 
             }) 
