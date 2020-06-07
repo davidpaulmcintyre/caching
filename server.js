@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const https = require('https')
 const http = require('http')
+const session = require('express-session');
 const privateKey  = fs.readFileSync('sslcert/selfsigned.key', 'utf8');
 const certificate = fs.readFileSync('sslcert/selfsigned.crt', 'utf8');
 
@@ -27,7 +28,6 @@ const mysql = Mysql.createConnection({
 // todo: cognito
 // todo: message queue
 
-const session = require('express-session');
 const bodyParser = require('body-parser')
 // const cookieParser = require('cookie-parser')
 // const cookieSession = require('cookie-session')
