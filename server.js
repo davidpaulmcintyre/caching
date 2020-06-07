@@ -10,8 +10,10 @@ const credentials = {key: privateKey, cert: certificate};
 const app = express()
 
 require('dotenv').config()
-const responseTime = require('response-time')  
-const Redis = require('ioredis');
+// const responseTime = require('response-time')  
+// const Redis = require('ioredis');
+const Redis = require("redis");
+var redisStore = require('connect-redis')(session);
 const Mysql      = require('mysql');
 const mysql = Mysql.createConnection({
     host     : process.env.MYSQL_URL,
@@ -39,8 +41,8 @@ app.use(bodyParser.urlencoded({
 const opts = {
     host: process.env.REDIS_URL,
     port: process.env.REDIS_PORT,
-    autoResubscribe: true,
-    maxRetriesPerRequest: 5
+    // autoResubscribe: true,
+    // maxRetriesPerRequest: 5
 };
 const redis = new Redis(opts); 
 
@@ -59,12 +61,13 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: true, 
         httpOnly: true },
-    store: redis
+    store: new redisStore(options)
   })) 
 
 http.createServer(app).listen(80, function() {
     console.log('listening on port 80');
   }); 
+// chrome blocks self-signed certs, so this doesnt work
 https.createServer(credentials, app).listen(443, function() {
     console.log('listening on port 443');
   }); 
@@ -78,8 +81,8 @@ redis.on("connect", function () {
 });  
  
 app.get('/', (req, res) => { 
-    if (req.session && req.session.username){
-        const username = req.session.username
+    if (req.session && req.session[username]){
+        const username = req.session[username]
         console.log('has username')  
         redis.set(username, username, function (err, reply) {
             console.log("redis.set " , reply);
@@ -97,7 +100,7 @@ app.get('/', (req, res) => {
 }); 
 
 app.get('/logout', (req, res) => { 
-    if (req.session && req.session.username){
+    if (req.session && req.session[username]){
         console.log('logout') 
         req.session.destroy(function(err) {
             res.redirect(301, '/login')
