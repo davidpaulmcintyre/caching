@@ -44,7 +44,7 @@ const opts = {
     // autoResubscribe: true,
     // maxRetriesPerRequest: 5
 };
-const redis = new Redis(opts); 
+const redis = new Redis(opts).createClient(); 
 
 mysql.connect(function(err){
     if(!err) {
