@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+    Generator: "former2"
+Description: ""
+Resources:
+    EC2Instance:
+        DeletionPolicy: "Retain"
+        Type: "AWS::EC2::Instance"
+        Properties:
+            ImageId: "ami-09d95fab7fff3776c"
+            InstanceType: "t2.micro"
+            KeyName: "Ec2TodoDeploymentKey"
+            AvailabilityZone: !Sub "${AWS::Region}a"
+            Tenancy: "default"
+            SubnetId: "subnet-0c5db79e8d3a7a517"
+            EbsOptimized: false
+            SecurityGroupIds: 
+              - "sg-04fda1375620c3ec8"
+            SourceDestCheck: true
+            BlockDeviceMappings: 
+              - 
+                DeviceName: "/dev/xvda"
+                Ebs: 
+                    Encrypted: false
+                    VolumeSize: 8
+                    SnapshotId: "snap-074e8f0568ee430f1"
+                    VolumeType: "gp2"
+                    DeleteOnTermination: true
+            Tags: 
+              - 
+                Key: "Name"
+                Value: "MyEc2"
+            HibernationOptions: 
+                Configured: false
+            CpuOptions: 
+                CoreCount: 1
+                ThreadsPerCore: 1
+
+    EC2VPC:
+        DeletionPolicy: "Retain"
+        Type: "AWS::EC2::VPC"
+        Properties:
+            CidrBlock: "172.31.0.0/16"
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+            InstanceTenancy: "default"
+            Tags: 
+              - 
+                Key: "Name"
+                Value: "VpcDefault"
+
+    RDSDBCluster:
+        DeletionPolicy: "Retain"
+        Type: "AWS::RDS::DBCluster"
+        Properties:
+            AvailabilityZones: 
+              - !GetAtt EC2Instance.AvailabilityZone
+              - !Sub "${AWS::Region}e"
+              - !Sub "${AWS::Region}b"
+            BackupRetentionPeriod: 1
+            DatabaseName: ""
+            DBClusterIdentifier: "database-1"
+            DBClusterParameterGroup: "default.aurora5.6"
+            DBSubnetGroupName: !Sub "default-${EC2VPC}"
+            Engine: "aurora"
+            Port: 3306
+            MasterUsername: "admin"
+            MasterUserPassword: "REPLACEME"
+            PreferredBackupWindow: "09:50-10:20"
+            PreferredMaintenanceWindow: "fri:03:25-fri:03:55"
+            VpcSecurityGroupIds: 
+              - "sg-96a7e2b8"
+            StorageEncrypted: true
+            KmsKeyId: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/cc26e803-a911-4299-a973-1c0875d9a819"
+            EngineVersion: "5.6.10a"
+            EnableIAMDatabaseAuthentication: false
+            EngineMode: "provisioned"
+            DeletionProtection: false
+            EnableHttpEndpoint: false
+
