@@ -2,7 +2,6 @@ const express = require('express');
 const fs = require('fs');
 const https = require('https')
 const http = require('http')
-const session = require('express-session');
 const privateKey  = fs.readFileSync('sslcert/selfsigned.key', 'utf8');
 const certificate = fs.readFileSync('sslcert/selfsigned.crt', 'utf8');
 
@@ -10,11 +9,8 @@ const credentials = {key: privateKey, cert: certificate};
 
 const app = express()
 
-require('dotenv').config()
-// const responseTime = require('response-time')  
-// const Redis = require('ioredis');
-const Redis = require("redis");
-var redisStore = require('connect-redis')(session);
+require('dotenv').config()  
+const Redis = require('ioredis');
 const Mysql      = require('mysql');
 const mysql = Mysql.createConnection({
     host     : process.env.MYSQL_URL,
@@ -28,6 +24,7 @@ const mysql = Mysql.createConnection({
 // todo: cognito
 // todo: message queue
 
+const session = require('express-session');
 const bodyParser = require('body-parser')
 // const cookieParser = require('cookie-parser')
 // const cookieSession = require('cookie-session')
@@ -41,10 +38,10 @@ app.use(bodyParser.urlencoded({
 const opts = {
     host: process.env.REDIS_URL,
     port: process.env.REDIS_PORT,
-    // autoResubscribe: true,
-    // maxRetriesPerRequest: 5
+    autoResubscribe: true,
+    maxRetriesPerRequest: 5
 };
-const redis = new Redis(opts).createClient(); 
+const redis = new Redis(opts); 
 
 mysql.connect(function(err){
     if(!err) {
@@ -61,13 +58,12 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: true, 
         httpOnly: true },
-    store: new redisStore(options)
+    store: redis
   })) 
 
 http.createServer(app).listen(80, function() {
     console.log('listening on port 80');
   }); 
-// chrome blocks self-signed certs, so this doesnt work
 https.createServer(credentials, app).listen(443, function() {
     console.log('listening on port 443');
   }); 
@@ -81,8 +77,8 @@ redis.on("connect", function () {
 });  
  
 app.get('/', (req, res) => { 
-    if (req.session && req.session[username]){
-        const username = req.session[username]
+    if (req.session && req.session.username){
+        const username = req.session.username
         console.log('has username')  
         redis.set(username, username, function (err, reply) {
             console.log("redis.set " , reply);
@@ -100,7 +96,7 @@ app.get('/', (req, res) => {
 }); 
 
 app.get('/logout', (req, res) => { 
-    if (req.session && req.session[username]){
+    if (req.session && req.session.username){
         console.log('logout') 
         req.session.destroy(function(err) {
             res.redirect(301, '/login')
